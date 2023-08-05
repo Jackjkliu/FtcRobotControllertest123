@@ -28,6 +28,7 @@ public class Robot{
     public DcMotorEx leftBack, leftFront, rightBack, rightFront;
     public BNO055IMU imu;
     Orientation currentAngle;
+    double ticksToInches;
 
     LinearOpMode linearOpMode;
     HardwareMap hardwareMap;
@@ -51,3 +52,16 @@ public class Robot{
     }
 }
 
+//method for forward/backward
+
+//method for strafing
+
+//method for rotating
+
+//method for four bar
+
+//method for claw
+
+//method for servo
+
+//method(s) for camera
