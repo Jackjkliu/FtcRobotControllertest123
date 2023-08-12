@@ -38,6 +38,6 @@ public class CameraDetector extends OpenCvPipeline {
         Mat left = mat.submat(LEFT_ROI);
         Mat right = mat.submat(RIGHT_ROI);
         double leftValue = Core.sumElems(left).val[0] / LEFT_ROI.area() /255;
-        double rightValue = Core.sumElems(right).val
+        double rightValue = Core.sumElems(right).val[]
     }
 }
