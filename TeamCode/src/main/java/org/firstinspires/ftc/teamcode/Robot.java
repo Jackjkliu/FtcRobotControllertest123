@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -23,10 +24,13 @@ import org.openftc.easyopencv.OpenCvWebcam;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+
 public class Robot{
 
     public DcMotorEx leftBack, leftFront, rightBack, rightFront;
+    public OpenCvWebcam webcam;
     public BNO055IMU imu;
+
     Orientation currentAngle;
     double ticksToInches;
 
@@ -78,8 +82,10 @@ public class Robot{
         rightFront.setPower(0);
         rightBack.setPower(0);
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void turn(double angle, double speed, double direction){//method for rotating
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         while(Math.abs(angleCompare(imu.getAngularOrientation().firstAngle, angle)) > 0){
             leftFront.setPower(speed*direction);
             rightFront.setPower(-speed*direction);
@@ -92,7 +98,7 @@ public class Robot{
         rightFront.setPower(0);
         rightBack.setPower(0);
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void strafe(double distance, int direction, double speed){ //method for strafing
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -104,13 +110,48 @@ public class Robot{
             leftBack.setPower(speed * direction*-1);
             rightBack.setPower(speed * direction);
             ticksmoved = Math.abs(leftFront.getCurrentPosition());
-
         }
         leftFront.setPower(0);
         leftBack.setPower(0);
         rightFront.setPower(0);
         rightBack.setPower(0);
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    public void fourBar(){
+
+    }
+    public void claw(){
+
+    }
+    public void servo(){
+
+    }
+
+    public void initOpenCV() {
+        int cameraMonitorViewId = hardwareMap.appContext.getResources()
+                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"),
+                cameraMonitorViewId);
+        webcam.setPipeline(new CameraDetector());
+        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
+        OpenCvWebcam finalWebcam = webcam;
+        FtcDashboard.getInstance().startCameraStream(webcam, 0);
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                finalWebcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+
+
+        });
     }
 
 
