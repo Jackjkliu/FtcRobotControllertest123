@@ -34,7 +34,7 @@ public class TicksToInchesFinder extends LinearOpMode {
         telemetry.addData("Right Back Ticks", bot.rightBack.getCurrentPosition());
 
 
-
+        bot.straight(1, 24, 0.5);
 
 
 
