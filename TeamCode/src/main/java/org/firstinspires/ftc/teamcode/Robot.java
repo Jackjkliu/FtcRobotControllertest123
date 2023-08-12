@@ -50,13 +50,66 @@ public class Robot{
         this.hardwareMap = hardwareMap;
 
     }
+    public void straight(double direction, double distance, double speed){ //method for forward/backward
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double ticksmoved = 0;
+        double tickstoinches = 3.14;
+        while(ticksmoved * tickstoinches < distance){
+            leftFront.setPower(speed*direction);
+            rightFront.setPower(speed*direction);
+            leftBack.setPower(speed*direction);
+            rightBack.setPower(speed*direction);
+            ticksmoved = Math.abs(leftFront.getCurrentPosition());
+        }
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+    public void turn(double angle, double speed, double direction){//method for rotating
+        while(angleCompare(imu.getAngularOrientation().firstAngle, angle) > 0){
+            leftFront.setPower(speed*direction);
+            rightFront.setPower(-speed*direction);
+            leftBack.setPower(speed*direction);
+            rightBack.setPower(-speed*direction);
+            imu.getAngularOrientation().firstangle;
+        }
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
+    public void strafe(double distance, int direction, double speed){ //method for strafing
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double ticksmoved = 0;
+        double tickstoinches = 3.14;
+        while(ticksmoved * tickstoinches < distance){
+            leftFront.setPower(speed * direction * -1);
+            rightFront.setPower(speed * direction);
+            leftBack.setPower(speed * direction);
+            rightBack.setPower(speed * direction * -1);
+            ticksmoved = Math.abs(leftFront.getCurrentPosition());
+
+        }
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+
 }
 
-//method for forward/backward
 
-//method for strafing
 
-//method for rotating
+
+
+
+
 
 //method for four bar
 
