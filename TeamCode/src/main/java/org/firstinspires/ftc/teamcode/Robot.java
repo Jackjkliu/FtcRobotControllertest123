@@ -50,6 +50,18 @@ public class Robot{
         this.hardwareMap = hardwareMap;
 
     }
+    public double angleCompare(double angle1, double angle2){
+        if(angle1 > angle2){
+            return angle1-angle2;
+        }
+        else if(angle2 > angle1){
+            return angle2-angle1;
+        }
+        else {
+            return 0;
+        }
+
+    }
     public void straight(double direction, double distance, double speed){ //method for forward/backward
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ticksmoved = 0;
@@ -68,12 +80,12 @@ public class Robot{
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
     public void turn(double angle, double speed, double direction){//method for rotating
-        while(angleCompare(imu.getAngularOrientation().firstAngle, angle) > 0){
+        while(Math.abs(angleCompare(imu.getAngularOrientation().firstAngle, angle)) > 0){
             leftFront.setPower(speed*direction);
             rightFront.setPower(-speed*direction);
             leftBack.setPower(speed*direction);
             rightBack.setPower(-speed*direction);
-            imu.getAngularOrientation().firstangle;
+            imu.getAngularOrientation().firstAngle;
         }
         leftFront.setPower(0);
         leftBack.setPower(0);
@@ -87,10 +99,10 @@ public class Robot{
         double ticksmoved = 0;
         double tickstoinches = 3.14;
         while(ticksmoved * tickstoinches < distance){
-            leftFront.setPower(speed * direction * -1);
-            rightFront.setPower(speed * direction);
-            leftBack.setPower(speed * direction);
-            rightBack.setPower(speed * direction * -1);
+            leftFront.setPower(speed * direction);
+            rightFront.setPower(speed * direction*-1);
+            leftBack.setPower(speed * direction*-1);
+            rightBack.setPower(speed * direction);
             ticksmoved = Math.abs(leftFront.getCurrentPosition());
 
         }
@@ -100,6 +112,8 @@ public class Robot{
         rightBack.setPower(0);
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+
+
 
 
 }
