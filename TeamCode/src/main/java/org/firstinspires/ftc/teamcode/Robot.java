@@ -27,12 +27,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Robot{
 
-    public DcMotorEx leftBack, leftFront, rightBack, rightFront;
+    public DcMotorEx leftBack, leftFront, rightBack, rightFront, armMotor;
+    public Servo armServo, Lclaw, Rclaw;
     public OpenCvWebcam webcam;
     public BNO055IMU imu;
 
     Orientation currentAngle;
     double ticksToInches;
+    boolean clawIsClosed;
 
     LinearOpMode linearOpMode;
     HardwareMap hardwareMap;
@@ -40,10 +42,14 @@ public class Robot{
 
 
     public Robot(HardwareMap hardwareMap, LinearOpMode linearOpMode) {
-        leftBack = hardwareMap.get(DcMotorEx.class, "leftRear");
-        rightBack = hardwareMap.get(DcMotorEx.class, "rightRear");
-        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
-        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        leftBack = hardwareMap.get(DcMotorEx.class, "lb");
+        rightBack = hardwareMap.get(DcMotorEx.class, "rb");
+        leftFront = hardwareMap.get(DcMotorEx.class, "lf");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rf");
+        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
+        armServo = hardwareMap.get(Servo.class, "as");
+        Lclaw = hardwareMap.get(Servo.class, "lc");
+        Rclaw = hardwareMap.get(Servo.class,"rc");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -52,6 +58,8 @@ public class Robot{
         currentAngle = imu.getAngularOrientation();
         this.linearOpMode = linearOpMode;
         this.hardwareMap = hardwareMap;
+        ticksToInches = 0;//change later
+        clawIsClosed = false;
 
     }
     public double angleCompare(double angle1, double angle2){
@@ -67,10 +75,10 @@ public class Robot{
 
     }
     public void straight(double direction, double distance, double speed){ //method for forward/backward
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //added this later, hopefully it doesn't break anything
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ticksmoved = 0;
-        double tickstoinches = 3.14;
-        while(ticksmoved * tickstoinches < distance){
+        while(ticksmoved * ticksToInches < distance){
             leftFront.setPower(speed*direction);
             rightFront.setPower(speed*direction);
             leftBack.setPower(speed*direction);
@@ -85,6 +93,7 @@ public class Robot{
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void turn(double angle, double speed, double direction){//method for rotating
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //added this later, hopefully it doesn't break anything
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         while(Math.abs(angleCompare(imu.getAngularOrientation().firstAngle, angle)) > 0){
             leftFront.setPower(speed*direction);
@@ -101,10 +110,10 @@ public class Robot{
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void strafe(double distance, int direction, double speed){ //method for strafing
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //added this later, hopefully it doesn't break anything
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ticksmoved = 0;
-        double tickstoinches = 3.14;
-        while(ticksmoved * tickstoinches < distance){
+        while(ticksmoved * ticksToInches < distance){
             leftFront.setPower(speed * direction);
             rightFront.setPower(speed * direction*-1);
             leftBack.setPower(speed * direction*-1);
@@ -118,15 +127,7 @@ public class Robot{
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    public void fourBar(){
 
-    }
-    public void claw(){
-
-    }
-    public void servo(){
-
-    }
 
     public void initOpenCV() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources()
@@ -157,19 +158,72 @@ public class Robot{
 
 
 
+    //below are the methods added for Auton and Teleop
+    public void moveFourBarArm(double desiredTickPosition, double speed){
+        //speed is any value type (negative does not matter)
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //added this later, hopefully it doesn't break anything
+        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        int buffer = 0;//it may be the case where the bot will try to oscillate the motor to reach exactly the desiredTickPosition. The buffer adds some leniency.
+        while(armMotor.getCurrentPosition() < desiredTickPosition - buffer || armMotor.getCurrentPosition() > desiredTickPosition + buffer){
+            if(armMotor.getCurrentPosition() < desiredTickPosition){//this line may need to be "if(armMotor.getCurrentPosition() < desiredTickPosition - buffer)" if there is an error
+                armMotor.setPower(Math.abs(speed));
+            }
+            else if(armMotor.getCurrentPosition() > desiredTickPosition) {//this line may need to be "if(armMotor.getCurrentPosition() > desiredTickPosition + buffer)" if there is an error
+                armMotor.setPower(-1 * Math.abs(speed));
+            }
+        }
+        armMotor.setPower(0);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    //followed 3 methods are related to the tree
+    public void moveFourBarToTop(double speed){
+        double encoderPosition = 0;//find the encoder value for the top level
+        moveFourBarArm(encoderPosition, speed);
+    }
+    public void moveFourBarToMid(double speed){
+        double encoderPosition = 0;//find the encoder value for the mid level
+        moveFourBarArm(encoderPosition, speed);
+    }
+    public void moveFourBarToLow(double speed){
+        double encoderPosition = 0;//find the encoder value for the low level
+        moveFourBarArm(encoderPosition, speed);
+    }
+    public void resetFourBarToPickupPos(double speed){
+        double encoderPosition = 0;//find the encoder value for the pickup level
+        moveFourBarArm(encoderPosition, speed);
+    }
+    public void moveClaw(){
+        if (clawIsClosed == true){
+            //these posiitons are to open the claw
+            Lclaw.setPosition(0);
+            Rclaw.setPosition(0);
+        }
+        else{
+            //these positions are to close the claw
+            Lclaw.setPosition(0);
+            Rclaw.setPosition(0);
+        }
+        clawIsClosed = !clawIsClosed;
+    }
+    public void moveArmToStar(double speed){
+        double encoderPosition = 0;//find the encoder value for the star
+        moveFourBarArm(encoderPosition,speed);
+        armServo.setPosition(0);//position to bring the armServo up to the star
+    }
+    public void junctionPreset(double speed){
+        double encoderPosition = 0;//find the encoder position to bring the arm up to the low junction
+        moveFourBarArm(encoderPosition, speed);
+    }
+    public void stockingPreset(double speed){
+        double encoderPosition = 0; //findthe encoder position to being the arm up to the stocking
+        moveFourBarArm(encoderPosition, speed);
+    }
+
+
+
+
 }
 
 
 
-
-
-
-
-
-//method for four bar
-
-//method for claw
-
-//method for servo
-
-//method(s) for camera
