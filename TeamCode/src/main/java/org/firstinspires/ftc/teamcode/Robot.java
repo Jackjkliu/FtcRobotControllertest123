@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
-import com.acmerobotics.dashboard.FtcDashboard;
+//import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -27,12 +27,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Robot{
 
-    public DcMotorEx leftBack, leftFront, rightBack, rightFront;
+    public DcMotorEx leftBack, leftFront, rightBack, rightFront, fourbar;
+    public Servo Arm, LeftClaw, RightClaw;
     public OpenCvWebcam webcam;
     public BNO055IMU imu;
 
+    final static double TicksToInchesstraight = 20;
+    final static double TicksToInchesstrafe = 27.5;
+
     Orientation currentAngle;
-    double ticksToInches;
 
     LinearOpMode linearOpMode;
     HardwareMap hardwareMap;
@@ -40,10 +43,23 @@ public class Robot{
 
 
     public Robot(HardwareMap hardwareMap, LinearOpMode linearOpMode) {
-        leftBack = hardwareMap.get(DcMotorEx.class, "leftRear");
-        rightBack = hardwareMap.get(DcMotorEx.class, "rightRear");
-        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
-        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        leftBack = hardwareMap.get(DcMotorEx.class, "lb");
+        rightBack = hardwareMap.get(DcMotorEx.class, "rb");
+        leftFront = hardwareMap.get(DcMotorEx.class, "lf");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rf");
+        fourbar = hardwareMap.get(DcMotorEx.class, "fourBar");
+
+        Arm = hardwareMap.get(Servo.class, "arm");
+        LeftClaw = hardwareMap.get(Servo.class, "leftClaw");
+        RightClaw = hardwareMap.get(Servo.class, "rightClaw");
+
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -69,8 +85,7 @@ public class Robot{
     public void straight(double direction, double distance, double speed){ //method for forward/backward
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ticksmoved = 0;
-        double tickstoinches = 3.14;
-        while(ticksmoved * tickstoinches < distance){
+        while(ticksmoved/TicksToInchesstraight < distance){
             leftFront.setPower(speed*direction);
             rightFront.setPower(speed*direction);
             leftBack.setPower(speed*direction);
@@ -103,8 +118,7 @@ public class Robot{
     public void strafe(double distance, int direction, double speed){ //method for strafing
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ticksmoved = 0;
-        double tickstoinches = 3.14;
-        while(ticksmoved * tickstoinches < distance){
+        while(ticksmoved/TicksToInchesstrafe < distance){
             leftFront.setPower(speed * direction);
             rightFront.setPower(speed * direction*-1);
             leftBack.setPower(speed * direction*-1);
@@ -136,7 +150,7 @@ public class Robot{
         webcam.setPipeline(new CameraDetector());
         webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
         OpenCvWebcam finalWebcam = webcam;
-        FtcDashboard.getInstance().startCameraStream(webcam, 0);
+        //FtcDashboard.getInstance().startCameraStream(webcam, 0);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {

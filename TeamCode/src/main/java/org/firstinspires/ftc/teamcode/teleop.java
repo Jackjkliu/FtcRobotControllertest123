@@ -1,14 +1,11 @@
-ampackage org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
-
-import org.firstinspires.ftc.teamcode.Robot;
 
 @TeleOp(name="Batman")
 
-public class TeleOp extends LinearOpMode {
+public class teleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Robot Batman = new Robot(hardwareMap,this);
