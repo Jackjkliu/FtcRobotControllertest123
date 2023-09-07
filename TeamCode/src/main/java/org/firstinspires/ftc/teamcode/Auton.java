@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(name = "AutoLeft", group = "auto")
-public class AutonLeft extends LinearOpMode {
+@Autonomous(name = "Auton", group = "auto")
+public class Auton extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException{
         Robot bot = new Robot(hardwareMap, this);
@@ -17,16 +17,18 @@ public class AutonLeft extends LinearOpMode {
         telemetry.update();
 
         //code to program the bot to drop a pre-collected ball into the tree
-        
+        bot.moveFourBarToLow(0.6);
+        bot.straight(1,12,0.6);
+
 
         //parking sequence
-        if (ballColor == 0){
-            bot.strafe(0,-1,0.6);
-            bot.straight(1,0,0.6);
+        if (ballColor == 1){
+            bot.strafe(-1,-36,0.6);
+            bot.straight(1,20,0.6);
         }
         else{
-            bot.strafe(0,1,0.6);
-            bot.straight(1, 0, 0.6);
+            bot.strafe(1,36,0.6);
+            bot.straight(1, 20, 0.6);
         }
     }
 }

@@ -34,6 +34,7 @@ public class Robot{
 
     Orientation currentAngle;
     double ticksToInches;
+    double ticksToInchesStrafe;
     boolean clawIsClosed;
 
     LinearOpMode linearOpMode;
@@ -58,7 +59,8 @@ public class Robot{
         currentAngle = imu.getAngularOrientation();
         this.linearOpMode = linearOpMode;
         this.hardwareMap = hardwareMap;
-        ticksToInches = 0;//change later
+        ticksToInches = 20;//change later
+        ticksToInchesStrafe = 27.5;
         clawIsClosed = false;
 
     }
@@ -109,11 +111,11 @@ public class Robot{
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    public void strafe(double distance, int direction, double speed){ //method for strafing
+    public void strafe(int direction, double distance, double speed){ //method for strafing
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //added this later, hopefully it doesn't break anything
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ticksmoved = 0;
-        while(ticksmoved * ticksToInches < distance){
+        while(ticksmoved * ticksToInchesStrafe < distance){
             leftFront.setPower(speed * direction);
             rightFront.setPower(speed * direction*-1);
             leftBack.setPower(speed * direction*-1);

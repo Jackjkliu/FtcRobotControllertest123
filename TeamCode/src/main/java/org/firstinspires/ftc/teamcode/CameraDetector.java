@@ -18,8 +18,8 @@ public class CameraDetector extends OpenCvPipeline {
     Telemetry telemetry;
 
     //target RGB values
-    static double[] targetOrange = {255, 165, 0};
-    static double[] targetWhite = {255, 255, 255};
+    static double[] targetOrange = {222, 156, 2};
+    static double[] targetWhite = {240, 239, 225};
 
     static double pctColorError = 0.20;
 
@@ -61,10 +61,10 @@ public class CameraDetector extends OpenCvPipeline {
             }
         }
         if(orangeCnt > whiteCnt){
-            ballColor = 0;
+            ballColor = 0; //park in the orange
         }
         if(whiteCnt > orangeCnt){
-            ballColor = 1;
+            ballColor = 1; //park in the white
         }
         return output;
     }
