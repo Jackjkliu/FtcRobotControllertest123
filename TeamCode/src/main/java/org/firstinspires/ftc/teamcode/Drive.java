@@ -63,6 +63,7 @@ public class Drive extends LinearOpMode {
             if (gamepad1.right_trigger > 0.05) {
                 bot.armMotor.setPower(-1* gamepad1.left_trigger*0.6);
             }
+
             if(gamepad1.dpad_up && !lateDup){
                 bot.moveFourBarToTop(0.8);
             }
@@ -75,8 +76,15 @@ public class Drive extends LinearOpMode {
             if(gamepad1.dpad_down && !lateDdown){
                 bot.resetFourBarToPickupPos(0.8);
             }
-            if(gamepad1.a && !lateA){
-                bot.moveClaw();
+
+            if(gamepad1.a && !lateA) {
+                bot.armMotor.setTargetPosition(100);
+            }
+            if(gamepad1.left_bumper){
+                bot.closeClaw();
+            }
+            if(gamepad1.right_bumper){
+                bot.openClaw();
             }
             if(gamepad1.x && !lateX){
                 bot.moveArmToStar(0.8);

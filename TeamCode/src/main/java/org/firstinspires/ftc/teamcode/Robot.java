@@ -47,10 +47,10 @@ public class Robot{
         rightBack = hardwareMap.get(DcMotorEx.class, "rb");
         leftFront = hardwareMap.get(DcMotorEx.class, "lf");
         rightFront = hardwareMap.get(DcMotorEx.class, "rf");
-        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
-        armServo = hardwareMap.get(Servo.class, "as");
-        Lclaw = hardwareMap.get(Servo.class, "lc");
-        Rclaw = hardwareMap.get(Servo.class,"rc");
+        armMotor = hardwareMap.get(DcMotorEx.class, "fourBar");
+        armServo = hardwareMap.get(Servo.class, "arm");
+        Lclaw = hardwareMap.get(Servo.class, "leftClaw");
+        Rclaw = hardwareMap.get(Servo.class,"rightClaw");
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -62,6 +62,9 @@ public class Robot{
         ticksToInches = 20;//change later
         ticksToInchesStrafe = 27.5;
         clawIsClosed = false;
+
+        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
     }
     public double angleCompare(double angle1, double angle2){
@@ -163,8 +166,7 @@ public class Robot{
     //below are the methods added for Auton and Teleop
     public void moveFourBarArm(double desiredTickPosition, double speed){
         //speed is any value type (negative does not matter)
-        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER); //added this later, hopefully it doesn't break anything
-        armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         int buffer = 0;//it may be the case where the bot will try to oscillate the motor to reach exactly the desiredTickPosition. The buffer adds some leniency.
         while(armMotor.getCurrentPosition() < desiredTickPosition - buffer || armMotor.getCurrentPosition() > desiredTickPosition + buffer){
             if(armMotor.getCurrentPosition() < desiredTickPosition){//this line may need to be "if(armMotor.getCurrentPosition() < desiredTickPosition - buffer)" if there is an error
@@ -174,52 +176,65 @@ public class Robot{
                 armMotor.setPower(-1 * Math.abs(speed));
             }
         }
-        armMotor.setPower(0);
-        armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    public void moveArmServo(double position){
+        armServo.setPosition(position);
+    }
+
     //followed 3 methods are related to the tree
     public void moveFourBarToTop(double speed){
-        double encoderPosition = 0;//find the encoder value for the top level
-        moveFourBarArm(encoderPosition, speed);
+        int encoderPosition = 200;//find the encoder value for the top level
+        armMotor.setPower(0.6);
+        armMotor.setTargetPosition(encoderPosition);
+        double servoPosition = 0;
+        moveArmServo(servoPosition);
     }
     public void moveFourBarToMid(double speed){
-        double encoderPosition = 0;//find the encoder value for the mid level
-        moveFourBarArm(encoderPosition, speed);
+        int encoderPosition = 170;//find the encoder value for the mid level
+        armMotor.setPower(0.6);
+        armMotor.setTargetPosition(encoderPosition);
+        double servoPosition = 0.5;
+        moveArmServo(servoPosition);
     }
     public void moveFourBarToLow(double speed){
-        double encoderPosition = 0;//find the encoder value for the low level
-        moveFourBarArm(encoderPosition, speed);
+        int encoderPosition = 160;//find the encoder value for the low level
+        armMotor.setPower(0.6);
+        armMotor.setTargetPosition(encoderPosition);
+        double servoPosition = 0.6;
+        moveArmServo(servoPosition);
     }
     public void resetFourBarToPickupPos(double speed){
-        double encoderPosition = 0;//find the encoder value for the pickup level
-        moveFourBarArm(encoderPosition, speed);
+        int encoderPosition = 0;//find the encoder value for the pickup level
+        armMotor.setPower(0.3);
+        armMotor.setTargetPosition(encoderPosition);
+        double servoPosition = 0.75;
+        moveArmServo(servoPosition);
     }
-    public void moveClaw(){
-        if (clawIsClosed == true){
-            //these posiitons are to open the claw
-            Lclaw.setPosition(0);
-            Rclaw.setPosition(0);
-        }
-        else{
-            //these positions are to close the claw
-            Lclaw.setPosition(0);
-            Rclaw.setPosition(0);
-        }
-        clawIsClosed = !clawIsClosed;
+    public void closeClaw(){
+        Lclaw.setPosition(0.74);
+        Rclaw.setPosition(0.06);
+    }
+    public void openClaw(){
+        Lclaw.setPosition(0.4);
+        Rclaw.setPosition(0.4);
     }
     public void moveArmToStar(double speed){
-        double encoderPosition = 0;//find the encoder value for the star
+        double encoderPosition = 200;//find the encoder value for the star
         moveFourBarArm(encoderPosition,speed);
-        armServo.setPosition(0);//position to bring the armServo up to the star
+        double servoPosition = 0;
+        moveArmServo(servoPosition);
     }
     public void junctionPreset(double speed){
-        double encoderPosition = 0;//find the encoder position to bring the arm up to the low junction
+        double encoderPosition = 200;//find the encoder position to bring the arm up to the low junction
         moveFourBarArm(encoderPosition, speed);
+        double servoPosition = 0;
+        moveArmServo(servoPosition);
     }
     public void stockingPreset(double speed){
-        double encoderPosition = 0; //findthe encoder position to being the arm up to the stocking
+        double encoderPosition = 77; //findthe encoder position to being the arm up to the stocking
         moveFourBarArm(encoderPosition, speed);
+        double servoPosition = 0;
+        moveArmServo(servoPosition);
     }
     public void resetAllDriveEncoders(){
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
